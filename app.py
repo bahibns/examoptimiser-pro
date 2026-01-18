@@ -103,7 +103,6 @@ def main():
         }
         
         /* Navigation Sidebar */
-        /* Navigation Sidebar */
         section[data-testid="stSidebar"] {
             background-color: #ffffff;
             border-right: 1px solid #e5e7eb;
@@ -205,7 +204,8 @@ def main():
                     template='plotly_white'
                 )
                 fig_students.update_layout(height=300, margin=dict(l=20, r=20, t=30, b=20))
-                st.plotly_chart(fig_students, use_container_width=True)
+                # FIX: Remplacé use_container_width par config dict
+                st.plotly_chart(fig_students, config={'responsive': True})
             
             with col_chart2:
                 st.markdown("##### 🎓 Professeurs par Département")
@@ -215,7 +215,8 @@ def main():
                     template='plotly_white'
                 )
                 fig_profs.update_layout(height=300, margin=dict(l=20, r=20, t=30, b=20))
-                st.plotly_chart(fig_profs, use_container_width=True)
+                # FIX: Remplacé use_container_width par config dict
+                st.plotly_chart(fig_profs, config={'responsive': True})
 
         # --- CONFLICTS SECTION ---
         st.markdown("### 🛡️ Centre de Contrôle")
