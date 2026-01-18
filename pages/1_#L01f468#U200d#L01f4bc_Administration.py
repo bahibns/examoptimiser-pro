@@ -20,6 +20,7 @@ st.set_page_config(
 def get_database():
     return Database()
 
+@st.cache_resource
 def get_scheduler(_db):
     return ExamScheduler(_db)
 
@@ -97,46 +98,36 @@ def main():
             col_btn1, col_btn2, col_btn3 = st.columns([1, 1, 2])
             
             with col_btn1:
-                # Initialiser session state
-                if 'generation_triggered' not in st.session_state:
-                    st.session_state.generation_triggered = False
-        
-                if st.button("🚀 Générer l'EDT", type="primary", key="btn_generate_edt"):
-                    st.session_state.generation_triggered = True
-                    st.rerun()
-        
-                if st.session_state.generation_triggered:
-                    st.session_state.generation_triggered = False
-            
+                if st.button("🚀 Générer l'EDT", type="primary", use_container_width=True):
                     with st.spinner("Génération en cours... Optimisé pour ~10 secondes"):
                         progress_bar = st.progress(0)
                         status_text = st.empty()
-                
+                        
                         status_text.text("Initialisation...")
                         progress_bar.progress(10)
-                
+                        
                         try:
                             status_text.text("Génération du planning...")
                             progress_bar.progress(30)
-                    
+                            
                             # Use ExamScheduler for scheduling
                             success, result = scheduler.generate_schedule(periode_id, annee_universitaire)
-                    
+                            
                             progress_bar.progress(80)
                             status_text.text("Finalisation...")
-                    
+                            
                             if success:
                                 progress_bar.progress(100)
                                 status_text.text("Terminé!")
-                        
+                                
                                 st.markdown(f"""
                                 <div class="custom-alert alert-success">
                                     <h4>✅ EDT généré avec succès en {result['execution_time']:.2f} secondes!</h4>
                                 </div>
                                 """, unsafe_allow_html=True)
-                        
+                                
                                 col_r1, col_r2, col_r3 = st.columns(3)
-                        
+                                
                                 def display_result_card(col, label, value, icon):
                                     with col:
                                         st.markdown(f"""
@@ -145,13 +136,13 @@ def main():
                                             <div class="metric-value">{value}</div>
                                         </div>
                                         """, unsafe_allow_html=True)
-                        
+                                
                                 display_result_card(col_r1, "Examens planifiés", result['scheduled'], "✅")
                                 display_result_card(col_r2, "Modules non planifiés", result['failed'], "⚠️")
                                 display_result_card(col_r3, "Conflits détectés", result['total_conflicts'], "🔍")
-                        
+                                
                                 st.markdown("<br>", unsafe_allow_html=True)
-                        
+                                
                                 if result['failed'] > 0:
                                     st.markdown("""
                                     <div class="custom-alert alert-warning">
@@ -159,8 +150,8 @@ def main():
                                     </div>
                                     """, unsafe_allow_html=True)
                                     failed_df = pd.DataFrame(result['failed_modules'])
-                                    st.dataframe(failed_df)
-                        
+                                    st.dataframe(failed_df, use_container_width=True)
+                                
                                 if result['total_conflicts'] > 0:
                                     st.markdown(f"""
                                     <div class="custom-alert alert-error">
@@ -168,10 +159,8 @@ def main():
                                         <p>Consultez l'onglet 'Détection de Conflits'</p>
                                     </div>
                                     """, unsafe_allow_html=True)
-                        
+                                
                                 st.balloons()
-                                st.success("✅ Génération terminée ! Consultez l'onglet 'Examens Planifiés'")
-                        
                             else:
                                 st.markdown(f"""
                                 <div class="custom-alert alert-error">
@@ -179,7 +168,7 @@ def main():
                                     <p>{result.get('error', 'Erreur inconnue')}</p>
                                 </div>
                                 """, unsafe_allow_html=True)
-                
+                        
                         except Exception as e:
                             st.markdown(f"""
                             <div class="custom-alert alert-error">
@@ -190,7 +179,7 @@ def main():
                             st.code(traceback.format_exc())
             
             with col_btn2:
-                if st.button("🔄 Optimiser l'EDT", type="secondary"):
+                if st.button("🔄 Optimiser l'EDT", use_container_width=True, type="secondary"):
                     with st.spinner("Optimisation en cours..."):
                         try:
                             optimizations = scheduler.optimize_schedule(periode_id)
@@ -207,7 +196,7 @@ def main():
                             """, unsafe_allow_html=True)
             
             with col_btn3:
-                if st.button("🗑️ Supprimer tous les examens"):
+                if st.button("🗑️ Supprimer tous les examens", use_container_width=True):
                     if st.checkbox("Confirmer la suppression"):
                         try:
                             db.delete_all_examens(periode_id)
@@ -275,6 +264,7 @@ def main():
                 
                 st.dataframe(
                     df[['date_heure', 'module_nom', 'salle_nom', 'professeur', 'nb_inscrits', 'duree_minutes', 'statut']],
+                    use_container_width=True,
                     hide_index=True
                 )
                 
@@ -419,6 +409,7 @@ def main():
                             st.dataframe(
                                 df_dept[['date_heure', 'departement', 'module_nom', 'module_code', 
                                         'salle_nom', 'batiment', 'professeur', 'nb_inscrits', 'duree_minutes']],
+                                use_container_width=True,
                                 hide_index=True
                             )
                         
