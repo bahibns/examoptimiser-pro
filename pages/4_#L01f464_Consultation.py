@@ -134,7 +134,8 @@ def show_student_view(db):
                             title='Calendrier de vos Examens',
                             labels={'count': 'Nombre d\'examens', 'date': 'Date'}
                         )
-                        st.plotly_chart(fig_calendar, use_container_width=True)
+                        # FIX: Remplacé use_container_width par config dict
+                        st.plotly_chart(fig_calendar, config={'responsive': True})
                     
                     with col_cal2:
                         total_duration = planning_df['duree_minutes'].sum()
@@ -302,7 +303,8 @@ def show_professor_view(db):
                             title='Calendrier de vos Surveillances',
                             labels={'count': 'Nombre de surveillances', 'date': 'Date'}
                         )
-                        st.plotly_chart(fig_calendar, use_container_width=True)
+                        # FIX: Remplacé use_container_width par config dict
+                        st.plotly_chart(fig_calendar, config={'responsive': True})
                     
                     with col_chart2:
                         role_counts = planning_df['role'].value_counts()
@@ -312,7 +314,8 @@ def show_professor_view(db):
                             names=role_counts.index,
                             title='Répartition par Rôle'
                         )
-                        st.plotly_chart(fig_pie, use_container_width=True)
+                        # FIX: Remplacé use_container_width par config dict
+                        st.plotly_chart(fig_pie, config={'responsive': True})
                     
                     st.markdown("---")
                     
