@@ -185,31 +185,50 @@ class Database:
     
     def batch_insert_exams(self, exams_data, surveillances_data):
         """
-        Batch insert exams and surveillances for high performance.
+        Batch insert exams and surveillances using execute_values for performance and stability.
         exams_data: list of tuples (module_id, prof_id, salle_id, periode_id, date_heure, duree_minutes, nb_inscrits)
-        surveillances_data: list of tuples (module_id, periode_id, prof_id, role) - we link via module+periode
+        surveillances_data: list of tuples (module_id, periode_id, prof_id, role)
         """
         if not exams_data:
             return
 
+        from psycopg2.extras import execute_values
+
         try:
             with self.get_connection() as conn:
                 with conn.cursor() as cur:
+                    # 1. Insert Exams
+                    # We add 'planifié' status to each tuple
+                    exams_values = [x + ('planifié',) for x in exams_data]
                     
-                    args_str = ','.join(cur.mogrify("(%s,%s,%s,%s,%s,%s,%s,'planifié')", x).decode('utf-8') for x in exams_data)
-                    cur.execute("INSERT INTO examens (module_id, prof_responsable_id, salle_id, periode_id, date_heure, duree_minutes, nb_inscrits, statut) VALUES " + args_str + " RETURNING id, module_id")
+                    query_exams = """
+                        INSERT INTO examens 
+                        (module_id, prof_responsable_id, salle_id, periode_id, date_heure, duree_minutes, nb_inscrits, statut)
+                        VALUES %s
+                        RETURNING id, module_id
+                    """
+                    
+                    # execute_values handles the massive string construction efficiently in C code
+                    # page_size=100 ensures we don't blow up memory even with huge lists
+                    execute_values(cur, query_exams, exams_values, page_size=100)
                     
                     rows = cur.fetchall()
                     module_exam_map = {row[1]: row[0] for row in rows}
                     
+                    # 2. Prepare Surveillances
                     final_surveillances = []
                     for mod_id, per_id, prof_id, role in surveillances_data:
                         if mod_id in module_exam_map:
                             final_surveillances.append((module_exam_map[mod_id], prof_id, role))
                     
+                    # 3. Insert Surveillances
                     if final_surveillances:
-                        args_surv = ','.join(cur.mogrify("(%s,%s,%s)", x).decode('utf-8') for x in final_surveillances)
-                        cur.execute("INSERT INTO surveillances (examen_id, prof_id, role) VALUES " + args_surv)
+                        query_surv = """
+                            INSERT INTO surveillances (examen_id, prof_id, role)
+                            VALUES %s
+                            ON CONFLICT (examen_id, prof_id) DO NOTHING
+                        """
+                        execute_values(cur, query_surv, final_surveillances, page_size=100)
                 
                 conn.commit()
         except Exception as e:
