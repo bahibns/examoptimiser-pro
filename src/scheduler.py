@@ -14,7 +14,7 @@ class ExamScheduler:
         periode = self.db.execute_query(
             "SELECT * FROM periodes_examen WHERE id = %s", 
             (periode_id,)
-        )[0]
+        )
         
         date_debut = periode['date_debut']
         date_fin = periode['date_fin']
