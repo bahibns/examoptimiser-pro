@@ -98,7 +98,7 @@ def main():
             col_btn1, col_btn2, col_btn3 = st.columns([1, 1, 2])
             
             with col_btn1:
-                if st.button("🚀 Générer l'EDT", type="primary", use_container_width=True):
+                if st.button("🚀 Générer l'EDT", type="primary"):
                     with st.spinner("Génération en cours... Optimisé pour ~10 secondes"):
                         progress_bar = st.progress(0)
                         status_text = st.empty()
@@ -150,7 +150,7 @@ def main():
                                     </div>
                                     """, unsafe_allow_html=True)
                                     failed_df = pd.DataFrame(result['failed_modules'])
-                                    st.dataframe(failed_df, use_container_width=True)
+                                    st.dataframe(failed_df, width=True)
                                 
                                 if result['total_conflicts'] > 0:
                                     st.markdown(f"""
@@ -264,7 +264,7 @@ def main():
                 
                 st.dataframe(
                     df[['date_heure', 'module_nom', 'salle_nom', 'professeur', 'nb_inscrits', 'duree_minutes', 'statut']],
-                    use_container_width=True,
+                    width=True,
                     hide_index=True
                 )
                 
@@ -409,7 +409,7 @@ def main():
                             st.dataframe(
                                 df_dept[['date_heure', 'departement', 'module_nom', 'module_code', 
                                         'salle_nom', 'batiment', 'professeur', 'nb_inscrits', 'duree_minutes']],
-                                use_container_width=True,
+                                width=True,
                                 hide_index=True
                             )
                         
