@@ -20,7 +20,6 @@ st.set_page_config(
 def get_database():
     return Database()
 
-@st.cache_resource
 def get_scheduler(_db):
     return ExamScheduler(_db)
 
