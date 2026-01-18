@@ -67,6 +67,9 @@ class ExamScheduler:
                 student_modules[sid] = set()
             student_modules[sid].add(mid)
         
+        # Free memory immediately
+        del enrollments
+        
         student_daily_exams = {}  
         
         exams_to_insert = []
